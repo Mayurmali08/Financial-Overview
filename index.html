@@ -1,0 +1,1494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FinTrack — Personal Finance Dashboard</title>
+
+<style>
+:root {
+  --bg: #f5f7fb;
+  --card: #ffffff;
+  --text: #172033;
+  --muted: #718096;
+  --border: #e6eaf0;
+  --primary: #635bff;
+  --primary-dark: #5148e5;
+  --green: #16a34a;
+  --red: #ef4444;
+  --orange: #f59e0b;
+  --shadow: 0 10px 30px rgba(20, 30, 60, .08);
+}
+
+.dark {
+  --bg: #10131a;
+  --card: #181c25;
+  --text: #f1f5f9;
+  --muted: #94a3b8;
+  --border: #29303d;
+  --shadow: 0 10px 30px rgba(0,0,0,.25);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Inter, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  transition: .2s;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.app {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* SIDEBAR */
+
+.sidebar {
+  width: 240px;
+  background: var(--card);
+  border-right: 1px solid var(--border);
+  padding: 25px 18px;
+  position: fixed;
+  height: 100vh;
+  left: 0;
+  top: 0;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 21px;
+  font-weight: 800;
+  margin-bottom: 40px;
+}
+
+.logo-icon {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  color: white;
+  border-radius: 11px;
+  background: linear-gradient(135deg, #635bff, #8b5cf6);
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.nav button {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  padding: 12px 14px;
+  border-radius: 10px;
+  text-align: left;
+  font-weight: 600;
+}
+
+.nav button:hover,
+.nav button.active {
+  background: rgba(99,91,255,.1);
+  color: var(--primary);
+}
+
+.sidebar-bottom {
+  position: absolute;
+  bottom: 25px;
+  left: 18px;
+  right: 18px;
+}
+
+.theme-btn {
+  width: 100%;
+  padding: 11px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  border-radius: 10px;
+}
+
+/* MAIN */
+
+.main {
+  margin-left: 240px;
+  width: calc(100% - 240px);
+  padding: 30px;
+  max-width: 1500px;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28px;
+}
+
+.topbar h1 {
+  font-size: 28px;
+  margin-bottom: 5px;
+}
+
+.topbar p {
+  color: var(--muted);
+}
+
+.add-btn {
+  background: var(--primary);
+  border: none;
+  color: white;
+  padding: 13px 19px;
+  border-radius: 10px;
+  font-weight: 700;
+}
+
+.add-btn:hover {
+  background: var(--primary-dark);
+}
+
+/* STAT CARDS */
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  border-radius: 16px;
+  padding: 22px;
+}
+
+.stat-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.stat-label {
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.stat-icon {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+}
+
+.balance-icon {
+  color: #635bff;
+  background: #eeecff;
+}
+
+.income-icon {
+  color: #16a34a;
+  background: #dcfce7;
+}
+
+.expense-icon {
+  color: #ef4444;
+  background: #fee2e2;
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.stat-sub {
+  margin-top: 7px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* GRID */
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  padding: 22px;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 22px;
+}
+
+.card-header h2 {
+  font-size: 17px;
+}
+
+/* BAR CHART */
+
+.chart {
+  height: 260px;
+  display: flex;
+  align-items: end;
+  gap: 12px;
+  padding: 10px 5px 30px;
+  border-bottom: 1px solid var(--border);
+}
+
+.bar-wrapper {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+  align-items: center;
+  gap: 7px;
+}
+
+.bar {
+  width: min(38px, 70%);
+  background: linear-gradient(to top, #635bff, #8b5cf6);
+  border-radius: 7px 7px 2px 2px;
+  min-height: 3px;
+  transition: height .4s;
+}
+
+.bar-label {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+/* CATEGORIES */
+
+.category-list {
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+}
+
+.category-row {
+  display: grid;
+  grid-template-columns: 35px 1fr auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.category-icon {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  background: rgba(99,91,255,.1);
+}
+
+.category-info {
+  min-width: 0;
+}
+
+.category-name {
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+.progress {
+  height: 6px;
+  background: var(--border);
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.progress div {
+  height: 100%;
+  background: var(--primary);
+  border-radius: 20px;
+}
+
+.category-value {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* TRANSACTIONS */
+
+.transactions {
+  margin-top: 20px;
+}
+
+.filters {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.search {
+  flex: 1;
+  min-width: 200px;
+  padding: 11px 13px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  outline: none;
+  background: var(--card);
+  color: var(--text);
+}
+
+.filter-select {
+  padding: 11px 13px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--card);
+  color: var(--text);
+  outline: none;
+}
+
+.transaction-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.transaction {
+  display: grid;
+  grid-template-columns: 45px 1fr auto auto;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 5px;
+  border-bottom: 1px solid var(--border);
+}
+
+.transaction:last-child {
+  border-bottom: none;
+}
+
+.transaction-icon {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  background: rgba(99,91,255,.1);
+  border-radius: 10px;
+}
+
+.transaction-name {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.transaction-category {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.transaction-date {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.amount {
+  font-weight: 800;
+}
+
+.amount.income {
+  color: var(--green);
+}
+
+.amount.expense {
+  color: var(--red);
+}
+
+.delete {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 17px;
+}
+
+.delete:hover {
+  color: var(--red);
+}
+
+.empty {
+  padding: 35px;
+  text-align: center;
+  color: var(--muted);
+}
+
+/* MODAL */
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.5);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 100;
+}
+
+.modal.show {
+  display: flex;
+}
+
+.modal-box {
+  width: 100%;
+  max-width: 470px;
+  background: var(--card);
+  color: var(--text);
+  border-radius: 18px;
+  padding: 25px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.25);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+
+.close {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 23px;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 7px;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  border-radius: 9px;
+  outline: none;
+}
+
+.type-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.type-btn {
+  padding: 11px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  border-radius: 9px;
+}
+
+.type-btn.selected-income {
+  background: #dcfce7;
+  border-color: #16a34a;
+  color: #15803d;
+}
+
+.type-btn.selected-expense {
+  background: #fee2e2;
+  border-color: #ef4444;
+  color: #dc2626;
+}
+
+.save-btn {
+  width: 100%;
+  padding: 13px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 800;
+  margin-top: 5px;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 1000px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 800px) {
+  .sidebar {
+    width: 70px;
+    padding: 20px 10px;
+  }
+
+  .logo span,
+  .nav button span {
+    display: none;
+  }
+
+  .logo {
+    justify-content: center;
+  }
+
+  .nav button {
+    text-align: center;
+    padding: 12px 5px;
+  }
+
+  .main {
+    margin-left: 70px;
+    width: calc(100% - 70px);
+    padding: 20px;
+  }
+}
+
+@media (max-width: 600px) {
+  .stats {
+    grid-template-columns: 1fr;
+  }
+
+  .topbar {
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .topbar h1 {
+    font-size: 22px;
+  }
+
+  .add-btn {
+    padding: 10px 12px;
+  }
+
+  .transaction {
+    grid-template-columns: 40px 1fr auto;
+  }
+
+  .transaction-date {
+    display: none;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+    <div class="logo">
+      <div class="logo-icon">₹</div>
+      <span>FinTrack</span>
+    </div>
+
+    <nav class="nav">
+      <button class="active">
+        📊 <span>Dashboard</span>
+      </button>
+
+      <button onclick="scrollToTransactions()">
+        💳 <span>Transactions</span>
+      </button>
+
+      <button onclick="openModal()">
+        ➕ <span>Add Transaction</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <button class="theme-btn" onclick="toggleTheme()">
+        🌙 <span id="themeText">Dark mode</span>
+      </button>
+    </div>
+
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <header class="topbar">
+      <div>
+        <h1>Financial Overview</h1>
+        <p>Track where your money goes.</p>
+      </div>
+
+      <button class="add-btn" onclick="openModal()">
+        + Add Transaction
+      </button>
+    </header>
+
+    <!-- STATS -->
+
+    <section class="stats">
+
+      <div class="stat-card">
+        <div class="stat-top">
+          <span class="stat-label">Current Balance</span>
+          <div class="stat-icon balance-icon">₹</div>
+        </div>
+
+        <div class="stat-value" id="balance">₹0</div>
+        <div class="stat-sub">Your available balance</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-top">
+          <span class="stat-label">Total Income</span>
+          <div class="stat-icon income-icon">↗</div>
+        </div>
+
+        <div class="stat-value" id="income">₹0</div>
+        <div class="stat-sub">Money you've received</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-top">
+          <span class="stat-label">Total Expenses</span>
+          <div class="stat-icon expense-icon">↘</div>
+        </div>
+
+        <div class="stat-value" id="expense">₹0</div>
+        <div class="stat-sub">Money you've spent</div>
+      </div>
+
+    </section>
+
+    <!-- CHARTS -->
+
+    <section class="dashboard-grid">
+
+      <div class="card">
+        <div class="card-header">
+          <h2>Monthly Spending</h2>
+          <span id="currentYear"></span>
+        </div>
+
+        <div class="chart" id="chart"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2>Expense Categories</h2>
+        </div>
+
+        <div class="category-list" id="categoryList"></div>
+      </div>
+
+    </section>
+
+    <!-- TRANSACTIONS -->
+
+    <section class="card transactions" id="transactionsSection">
+
+      <div class="card-header">
+        <h2>Recent Transactions</h2>
+
+        <button onclick="exportCSV()" style="
+          border:1px solid var(--border);
+          background:var(--card);
+          color:var(--text);
+          padding:8px 12px;
+          border-radius:8px;
+        ">
+          Export CSV
+        </button>
+      </div>
+
+      <div class="filters">
+
+        <input
+          id="search"
+          class="search"
+          placeholder="Search transactions..."
+          oninput="renderTransactions()"
+        >
+
+        <select
+          id="typeFilter"
+          class="filter-select"
+          onchange="renderTransactions()"
+        >
+          <option value="all">All types</option>
+          <option value="income">Income</option>
+          <option value="expense">Expense</option>
+        </select>
+
+        <select
+          id="categoryFilter"
+          class="filter-select"
+          onchange="renderTransactions()"
+        >
+          <option value="all">All categories</option>
+          <option>Food</option>
+          <option>Transport</option>
+          <option>Shopping</option>
+          <option>Bills</option>
+          <option>Entertainment</option>
+          <option>Health</option>
+          <option>Education</option>
+          <option>Salary</option>
+          <option>Other</option>
+        </select>
+
+      </div>
+
+      <div class="transaction-list" id="transactionList"></div>
+
+    </section>
+
+    <div style="
+      text-align:center;
+      color:var(--muted);
+      font-size:12px;
+      padding:25px 0;
+    ">
+      FinTrack stores your data locally in your browser.
+    </div>
+
+  </main>
+
+</div>
+
+
+<!-- MODAL -->
+
+<div class="modal" id="modal">
+
+  <div class="modal-box">
+
+    <div class="modal-header">
+      <h2>Add Transaction</h2>
+      <button class="close" onclick="closeModal()">×</button>
+    </div>
+
+    <div class="form-group">
+
+      <label>Transaction Type</label>
+
+      <div class="type-buttons">
+
+        <button
+          id="expenseBtn"
+          class="type-btn selected-expense"
+          onclick="setType('expense')"
+        >
+          Expense
+        </button>
+
+        <button
+          id="incomeBtn"
+          class="type-btn"
+          onclick="setType('income')"
+        >
+          Income
+        </button>
+
+      </div>
+
+    </div>
+
+    <div class="form-group">
+
+      <label>Description</label>
+
+      <input
+        id="description"
+        placeholder="e.g. Grocery shopping"
+      >
+
+    </div>
+
+    <div class="form-group">
+
+      <label>Amount (₹)</label>
+
+      <input
+        id="amount"
+        type="number"
+        min="0"
+        placeholder="0"
+      >
+
+    </div>
+
+    <div class="form-group">
+
+      <label>Category</label>
+
+      <select id="category">
+        <option>Food</option>
+        <option>Transport</option>
+        <option>Shopping</option>
+        <option>Bills</option>
+        <option>Entertainment</option>
+        <option>Health</option>
+        <option>Education</option>
+        <option>Salary</option>
+        <option>Other</option>
+      </select>
+
+    </div>
+
+    <div class="form-group">
+
+      <label>Date</label>
+
+      <input
+        id="date"
+        type="date"
+      >
+
+    </div>
+
+    <button class="save-btn" onclick="saveTransaction()">
+      Save Transaction
+    </button>
+
+  </div>
+
+</div>
+
+
+<script>
+
+/* =========================
+   DATA
+========================= */
+
+let transactions =
+  JSON.parse(localStorage.getItem("fintrack-transactions")) || [];
+
+let transactionType = "expense";
+
+
+/* =========================
+   HELPERS
+========================= */
+
+function saveData() {
+  localStorage.setItem(
+    "fintrack-transactions",
+    JSON.stringify(transactions)
+  );
+}
+
+function formatMoney(value) {
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0
+  }).format(value);
+}
+
+
+/* =========================
+   MODAL
+========================= */
+
+function openModal() {
+
+  document.getElementById("modal").classList.add("show");
+
+  document.getElementById("date").value =
+    new Date().toISOString().split("T")[0];
+
+  document.getElementById("description").focus();
+}
+
+function closeModal() {
+  document.getElementById("modal").classList.remove("show");
+}
+
+function setType(type) {
+
+  transactionType = type;
+
+  const expenseBtn =
+    document.getElementById("expenseBtn");
+
+  const incomeBtn =
+    document.getElementById("incomeBtn");
+
+  expenseBtn.className = "type-btn";
+  incomeBtn.className = "type-btn";
+
+  if (type === "expense") {
+    expenseBtn.classList.add("selected-expense");
+  } else {
+    incomeBtn.classList.add("selected-income");
+  }
+}
+
+
+/* =========================
+   ADD TRANSACTION
+========================= */
+
+function saveTransaction() {
+
+  const description =
+    document.getElementById("description").value.trim();
+
+  const amount =
+    Number(document.getElementById("amount").value);
+
+  const category =
+    document.getElementById("category").value;
+
+  const date =
+    document.getElementById("date").value;
+
+  if (!description) {
+    alert("Please enter a description.");
+    return;
+  }
+
+  if (!amount || amount <= 0) {
+    alert("Please enter a valid amount.");
+    return;
+  }
+
+  if (!date) {
+    alert("Please select a date.");
+    return;
+  }
+
+  transactions.unshift({
+    id: Date.now(),
+    description,
+    amount,
+    category,
+    date,
+    type: transactionType
+  });
+
+  saveData();
+
+  document.getElementById("description").value = "";
+  document.getElementById("amount").value = "";
+
+  closeModal();
+
+  updateDashboard();
+}
+
+
+/* =========================
+   DELETE
+========================= */
+
+function deleteTransaction(id) {
+
+  if (!confirm("Delete this transaction?")) {
+    return;
+  }
+
+  transactions =
+    transactions.filter(t => t.id !== id);
+
+  saveData();
+
+  updateDashboard();
+}
+
+
+/* =========================
+   DASHBOARD
+========================= */
+
+function updateDashboard() {
+
+  const income =
+    transactions
+      .filter(t => t.type === "income")
+      .reduce((sum, t) => sum + t.amount, 0);
+
+  const expense =
+    transactions
+      .filter(t => t.type === "expense")
+      .reduce((sum, t) => sum + t.amount, 0);
+
+  const balance = income - expense;
+
+  document.getElementById("balance").textContent =
+    formatMoney(balance);
+
+  document.getElementById("income").textContent =
+    formatMoney(income);
+
+  document.getElementById("expense").textContent =
+    formatMoney(expense);
+
+  renderTransactions();
+  renderCategories();
+  renderChart();
+}
+
+
+/* =========================
+   TRANSACTIONS
+========================= */
+
+function renderTransactions() {
+
+  const list =
+    document.getElementById("transactionList");
+
+  const search =
+    document.getElementById("search")
+      .value.toLowerCase();
+
+  const type =
+    document.getElementById("typeFilter").value;
+
+  const category =
+    document.getElementById("categoryFilter").value;
+
+  let filtered = transactions.filter(t => {
+
+    const matchesSearch =
+      t.description.toLowerCase().includes(search) ||
+      t.category.toLowerCase().includes(search);
+
+    const matchesType =
+      type === "all" || t.type === type;
+
+    const matchesCategory =
+      category === "all" || t.category === category;
+
+    return matchesSearch &&
+           matchesType &&
+           matchesCategory;
+  });
+
+  list.innerHTML = "";
+
+  if (filtered.length === 0) {
+
+    list.innerHTML = `
+      <div class="empty">
+        No transactions found.
+      </div>
+    `;
+
+    return;
+  }
+
+  filtered.forEach(t => {
+
+    const row =
+      document.createElement("div");
+
+    row.className = "transaction";
+
+    const sign =
+      t.type === "income" ? "+" : "-";
+
+    const icon =
+      getCategoryIcon(t.category);
+
+    row.innerHTML = `
+
+      <div class="transaction-icon">
+        ${icon}
+      </div>
+
+      <div>
+        <div class="transaction-name">
+          ${escapeHTML(t.description)}
+        </div>
+
+        <div class="transaction-category">
+          ${escapeHTML(t.category)}
+        </div>
+      </div>
+
+      <div class="transaction-date">
+        ${formatDate(t.date)}
+      </div>
+
+      <div>
+        <span class="amount ${t.type}">
+          ${sign}${formatMoney(t.amount)}
+        </span>
+
+        <button
+          class="delete"
+          onclick="deleteTransaction(${t.id})"
+          title="Delete"
+        >
+          🗑
+        </button>
+      </div>
+    `;
+
+    list.appendChild(row);
+  });
+}
+
+
+/* =========================
+   CATEGORY BREAKDOWN
+========================= */
+
+function renderCategories() {
+
+  const container =
+    document.getElementById("categoryList");
+
+  const expenses =
+    transactions.filter(t => t.type === "expense");
+
+  if (expenses.length === 0) {
+
+    container.innerHTML = `
+      <div class="empty">
+        Add expenses to see your spending breakdown.
+      </div>
+    `;
+
+    return;
+  }
+
+  const totals = {};
+
+  expenses.forEach(t => {
+
+    if (!totals[t.category]) {
+      totals[t.category] = 0;
+    }
+
+    totals[t.category] += t.amount;
+  });
+
+  const total =
+    expenses.reduce((sum, t) => sum + t.amount, 0);
+
+  const sorted =
+    Object.entries(totals)
+      .sort((a,b) => b[1] - a[1]);
+
+  container.innerHTML = "";
+
+  sorted.slice(0, 6).forEach(([category, value]) => {
+
+    const percentage =
+      Math.round((value / total) * 100);
+
+    const row =
+      document.createElement("div");
+
+    row.className = "category-row";
+
+    row.innerHTML = `
+
+      <div class="category-icon">
+        ${getCategoryIcon(category)}
+      </div>
+
+      <div class="category-info">
+
+        <div class="category-name">
+          ${escapeHTML(category)}
+        </div>
+
+        <div class="progress">
+          <div style="width:${percentage}%"></div>
+        </div>
+
+      </div>
+
+      <div class="category-value">
+        ${formatMoney(value)}
+      </div>
+    `;
+
+    container.appendChild(row);
+  });
+}
+
+
+/* =========================
+   CHART
+========================= */
+
+function renderChart() {
+
+  const chart =
+    document.getElementById("chart");
+
+  chart.innerHTML = "";
+
+  const year =
+    new Date().getFullYear();
+
+  document.getElementById("currentYear").textContent =
+    year;
+
+  const monthly = Array(12).fill(0);
+
+  transactions.forEach(t => {
+
+    if (
+      t.type === "expense" &&
+      new Date(t.date).getFullYear() === year
+    ) {
+
+      const month =
+        new Date(t.date).getMonth();
+
+      monthly[month] += t.amount;
+    }
+  });
+
+  const max =
+    Math.max(...monthly, 1);
+
+  const labels = [
+    "Jan","Feb","Mar","Apr","May","Jun",
+    "Jul","Aug","Sep","Oct","Nov","Dec"
+  ];
+
+  monthly.forEach((value, index) => {
+
+    const wrapper =
+      document.createElement("div");
+
+    wrapper.className = "bar-wrapper";
+
+    const bar =
+      document.createElement("div");
+
+    bar.className = "bar";
+
+    const height =
+      value === 0
+        ? 3
+        : Math.max((value / max) * 100, 5);
+
+    bar.style.height =
+      height + "%";
+
+    bar.title =
+      formatMoney(value);
+
+    const label =
+      document.createElement("div");
+
+    label.className = "bar-label";
+
+    label.textContent =
+      labels[index];
+
+    wrapper.appendChild(bar);
+    wrapper.appendChild(label);
+
+    chart.appendChild(wrapper);
+  });
+}
+
+
+/* =========================
+   CATEGORY ICONS
+========================= */
+
+function getCategoryIcon(category) {
+
+  const icons = {
+    Food: "🍔",
+    Transport: "🚗",
+    Shopping: "🛍️",
+    Bills: "📄",
+    Entertainment: "🎬",
+    Health: "❤️",
+    Education: "📚",
+    Salary: "💰",
+    Other: "📦"
+  };
+
+  return icons[category] || "📦";
+}
+
+
+/* =========================
+   DATE
+========================= */
+
+function formatDate(date) {
+
+  return new Date(date + "T00:00:00")
+    .toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "short",
+      year: "numeric"
+    });
+}
+
+
+/* =========================
+   SECURITY
+========================= */
+
+function escapeHTML(value) {
+
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+
+/* =========================
+   DARK MODE
+========================= */
+
+function toggleTheme() {
+
+  document.body.classList.toggle("dark");
+
+  const dark =
+    document.body.classList.contains("dark");
+
+  localStorage.setItem(
+    "fintrack-dark",
+    dark
+  );
+
+  document.getElementById("themeText").textContent =
+    dark ? "Light mode" : "Dark mode";
+}
+
+if (localStorage.getItem("fintrack-dark") === "true") {
+  document.body.classList.add("dark");
+  document.getElementById("themeText").textContent =
+    "Light mode";
+}
+
+
+/* =========================
+   CSV EXPORT
+========================= */
+
+function exportCSV() {
+
+  if (transactions.length === 0) {
+    alert("There are no transactions to export.");
+    return;
+  }
+
+  let csv =
+    "Description,Type,Amount,Category,Date\n";
+
+  transactions.forEach(t => {
+
+    csv += [
+      `"${t.description.replace(/"/g, '""')}"`,
+      t.type,
+      t.amount,
+      t.category,
+      t.date
+    ].join(",") + "\n";
+  });
+
+  const blob =
+    new Blob([csv], {
+      type: "text/csv"
+    });
+
+  const url =
+    URL.createObjectURL(blob);
+
+  const a =
+    document.createElement("a");
+
+  a.href = url;
+  a.download = "fintrack-transactions.csv";
+
+  a.click();
+
+  URL.revokeObjectURL(url);
+}
+
+
+/* =========================
+   NAVIGATION
+========================= */
+
+function scrollToTransactions() {
+
+  document
+    .getElementById("transactionsSection")
+    .scrollIntoView({
+      behavior: "smooth"
+    });
+}
+
+
+/* =========================
+   CLOSE MODAL
+========================= */
+
+document
+  .getElementById("modal")
+  .addEventListener("click", function(e) {
+
+    if (e.target === this) {
+      closeModal();
+    }
+  });
+
+
+/* =========================
+   INITIALIZE
+========================= */
+
+updateDashboard();
+
+</script>
+
+</body>
+</html>
